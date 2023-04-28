@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <style>
+      body{ max-width: 960px; margin: auto; }      
+    </style>
+    <meta charset="utf-8">
+    <title>Jalebi : Java Leaner Build</title>
+  </head>
+  <body>
+    <h1>Jalebi : Java Leaner Build</h1>
+    <p>
+      Features:
+      <ul>
+	<li>Java based: bootstrapping and configuration are java files.</li>
+	<li>File system standard, src/main/jalebi/java for config files.</li>
+	<li>Subprojects support: top Config file references subprojects's config files.</li>
+	<li>Submodule support: add any Jalebi project to another as submodule.</li>
+	<li>vendoring support: any plugin or library can be vendored.</li>
+	<li>modular:  modules based</li>
+	<li>Needs JDK21 or later.</li>
+      </ul>
+    </p>
+    <h1>Progress report</h1>
+    <h2> Week 1: 24 Apr 2023 </h2>
+    <ul>
+      <li>
+	Starting the <a href="https://codeberg.org/vrdhn/jalebi"> Jalebi project</a>
+	<br/>
+	Let's make it AGPL-3.0 or later. Nobody should be shipping anything with code
+	from a build system.
+      </li>      
+      <li>
+	Can compile and load vendored (currently empty )  <code>jalebi-bootstrap.jar</code>.
+	<br/>
+	The funny thing is vendored support has to be done first, and then upload to maven,
+	and <em>then</em> download support
+      </li>      
+    </ul>
+  </body>
+</html>
