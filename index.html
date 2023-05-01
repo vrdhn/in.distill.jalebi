@@ -23,17 +23,29 @@
     </p>
     <h1>Progress report</h1>
     <h2> Week 2: 01 May 2023 </h2>
+    <ul>
+        <li>
+            Vendoring of plugins is going to be challenging.
+            The  issue is, the <code>src/jalebi</code>
+            folder should have the code for the extensions, but also should (eventually )
+            have capability of uploading the jar to maven. What this means is, that the
+            build system of jalebi will need to handle <code>src/jalebi</code> differently
+            than a project using <em>jalebi</em>. This may become trivial if processor
+            of <code>src/jalebi</code> is built on top of processor of <code>src/main</code>
+        </li>
+    </ul>
     <h3>Planned</h3>
     <ul>
       <li>
 	Use compiler api, ( vs executing java ) for vendored <code>jalebi-bootstrap</code>
 	<br/>
-	Plan is not to invoke exeternal tool as far as possible. 
+	Plan is not to invoke external tool as far as possible.
       </li>
       <li>
 	Freeze directory layout.
 	<br/>
 	Currently leaning towards <code>[Module-Name]/src/[thing]/java/module-info.java</code>
+          where thing is going to be `jalebi` for Jalebi configuration file.
 	<br/>
 	The <code>Bootstrap.java</code> 
       </li>

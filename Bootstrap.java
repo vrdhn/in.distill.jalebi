@@ -21,69 +21,84 @@ import java.lang.reflect.Method;
  */
 public final class Bootstrap {
 
+    /**
+     * Here you define all the modules there are ...... A module should have
+     * src/main/java/module-info.java and optionally src/jalebi/java/module-info.java
+     */
+    private static final String[] MODULES = {            "jalebi-boostrap",
 
-  /**
-   * Update this to vendored copy of jalebi-bootstrap or null to save a few micosecond to check
-   * existance of this. (in which case, the class VendoredBootstrapper can be removed as well)
-   */
-  private static final Path PROJECT_ROOT =
-      Paths.get(System.getProperty("jdk.launcher.sourcefile")).toAbsolutePath().getParent();
+        "jalebi-boostrap",
+    };
 
-  private static final Path VENDORED =
-      PROJECT_ROOT.resolve("jalebi-bootstrap/BootstrapperJalebi.java");
-  private static final Path VENDORED_JAR =
-      PROJECT_ROOT.resolve("jalebi-bootstrap/target/jalebi-bootstrap.jar");
+    /**
+     * Update this to vendored copy of jalebi-bootstrap or null to save a few micosecond to check
+     * existance of this. (in which case, the class VendoredBootstrapper can be removed as well)
+     */
+    private static final Path SCRIPT_FILE =
+            Paths.get(System.getProperty("jdk.launcher.sourcefile"));
 
-  private static final Path JALEBI_HOME =
-      Paths.get(System.getProperty("user.home"), ".config", "Jalebi");
+    private static final Path PROJECT_ROOT = SCRIPT_FILE.toAbsolutePath().getParent();
 
-  // This is fine on linux . Windows has additional complexity of javaw and .exe
-  private static final Path JAVA_BINARY = Paths.get(System.getProperty("java.home"), "bin", "java");
+    private static final Path VENDORED =
+            PROJECT_ROOT.resolve("jalebi-bootstrap/BootstrapperJalebi.java");
+    private static final Path VENDORED_JAR =
+            PROJECT_ROOT.resolve("jalebi-bootstrap/target/jalebi-bootstrap.jar");
 
-  public void run(String[] args) throws Exception {
+    private static final Path JALEBI_HOME =
+            Paths.get(System.getProperty("user.home"), ".config", "Jalebi");
 
-    final Path stage1Jar = getStage1JarVendored();
+    // This is fine on linux . Windows has additional complexity of javaw and .exe
+    private static final Path JAVA_BINARY =
+            Paths.get(System.getProperty("java.home"), "bin", "java");
 
-    JarFileLoader jfl = new JarFileLoader();
-    jfl.addFile(stage1Jar);
-    Class<?> cls = jfl.loadClass("in.distill.jalebi.bootstrap.Launcher");
-    Method launcher = cls.getMethod("launcher", String.class.arrayType());
-    launcher.invoke(null,(Object)args);
-  }
+    public void run(String[] args) throws Exception {
 
-  public static class JarFileLoader extends URLClassLoader {
-    public JarFileLoader() {
-      super(new URL[0]);
+        final Path stage1Jar = getStage1JarVendored();
+
+        JarFileLoader jfl = new JarFileLoader();
+        jfl.addFile(stage1Jar);
+        Class<?> cls = jfl.loadClass("in.distill.jalebi.bootstrap.Launcher");
+        Method launcher =
+                cls.getMethod(
+                        "launcher", Path.class, String.class.arrayType(), String.class.arrayType());
+        launcher.invoke(null, SCRIPT_FILE, MODULES, (Object) args);
     }
 
-      public void addFile(Path path) throws URISyntaxException,MalformedURLException {
-      String urlPath = "jar:file://" + path + "!/";
-      addURL(new URI(urlPath).toURL());
-    }
-  }
+    public static class JarFileLoader extends URLClassLoader {
+        public JarFileLoader() {
+            super(new URL[0]);
+        }
 
-  // TODO: this should use compiler api, and not launch java.
-  private Path getStage1JarVendored() throws IOException, InterruptedException {
-    if (!Files.exists(VENDORED)) {
-      return null;
-    }
-    Process proc =
-        new ProcessBuilder()
-            .directory(VENDORED.getParent().toFile())
-            .command(JAVA_BINARY.toString(), VENDORED.toString())
-            .start();
-    int ret = proc.waitFor();
-    if (ret != 0 || !Files.exists(VENDORED_JAR)) {
-      System.out.println("** ERROR compiling vendored " + VENDORED);
-      proc.getInputStream().transferTo(System.out);
-      proc.getErrorStream().transferTo(System.out);
-      System.exit(1);
+        public void addFile(Path path) throws URISyntaxException, MalformedURLException {
+            String urlPath = "jar:file://" + path + "!/";
+            addURL(new URI(urlPath).toURL());
+        }
     }
 
-    return VENDORED_JAR;
-  }
+    // This *should* use java compiler API, but for now
+    // it's okay if this launches java,
+    // vendoring of jalebi-botstrap is a *special* case.
+    private Path getStage1JarVendored() throws IOException, InterruptedException {
+        if (!Files.exists(VENDORED)) {
+            return null;
+        }
+        Process proc =
+                new ProcessBuilder()
+                        .directory(VENDORED.getParent().toFile())
+                        .command(JAVA_BINARY.toString(), VENDORED.toString())
+                        .start();
+        int ret = proc.waitFor();
+        if (ret != 0 || !Files.exists(VENDORED_JAR)) {
+            System.out.println("** ERROR compiling vendored " + VENDORED);
+            proc.getInputStream().transferTo(System.out);
+            proc.getErrorStream().transferTo(System.out);
+            System.exit(1);
+        }
 
-  public static void main(String[] args) throws Exception {
-    new Bootstrap().run(args);
-  }
+        return VENDORED_JAR;
+    }
+
+    public static void main(String[] args) throws Exception {
+        new Bootstrap().run(args);
+    }
 }
