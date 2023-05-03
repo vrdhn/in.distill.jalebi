@@ -1,0 +1,1 @@
+module jalebi.examples.executable {}

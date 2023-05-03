@@ -44,20 +44,33 @@ public final class Launcher {
         }
     }
 
+    private static List<Path> getSubDirs(Path p) throws Exception {
+        return Files.list(p).filter(f -> Files.isDirectory(f)).toList();
+    }
+
+    private static void walk(Tools tools, Path modRoot, Path p, int depth) throws Exception {
+        if (depth > 0) {
+            depth--;
+            for (Path sub : getSubDirs(p)) {
+                Path f = modRoot.relativize(sub);
+                LOG.info("Checking " + modRoot.getFileName() + " : " + f);
+                if (!tools.tryToClaim(f)) {
+                    walk(modRoot, sub, depth);
+                }
+            }
+        }
+    }
+
+    // Create the Tools, which will have
+
     // All the tools we'll need to run.
 
     // a module folder will have 'src/[processor]/
-    private static Tools processModuleFolders(Path root, String[] modules) throws Exception {
+    private static Tools processModuleFolders(Path top, String[] modules) throws Exception {
         Tools tools = new Tools();
         for (String module : modules) {
-            Path src = root.resolve(module).resolve("src");
-            if (Files.exists(src) && Files.isDirectory(src)) {
-                List<Path> toolRoots = Files.list(src).toList();
-                for (Path toolRoot : toolRoots) {
-                    String toolName = toolRoot.getFileName().toString();
-                    tools.addToolRoot(module, toolName, toolRoot);
-                }
-            }
+            Path modRoot = top.resolve(module);
+            walk(tools, modRoot, modRoot, 3);
         }
         return tools;
     }

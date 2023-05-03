@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later; (C) Vardhan Varma, Distill.in
 
-// This ia specialized BootstrapperJalebi.java for the bootstrapper. Using this elsewhere
+// This ia specialized CoreperJalebi.java for the coreper. Using this elsewhere
 // is not recommended.
 
 import java.io.BufferedInputStream;
@@ -24,24 +24,23 @@ import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
-import java.util.Arrays;
+
 /*
  * Collect all the java  files from  src/main/java
- * Compare if any of them, or this file, is newer then target/jalebi-bootstrap.jar
- * if yes compile and recreate the jalebi-bootstrap.jar
+ * Compare if any of them, or this file, is newer then target/jalebi-core.jar
+ * if yes compile and recreate the jalebi-core.jar
  */
 
-class JalebiBootstrapVendoredBuild {
-    private static Logger LOG = Logger.getLogger(JalebiBootstrapVendoredBuild.class.getName());
+class JalebiCoreVendoredBuild {
+    private static Logger LOG = Logger.getLogger(JalebiCoreVendoredBuild.class.getName());
 
     private static final Path JALEBI_FILE =
             Paths.get(System.getProperty("jdk.launcher.sourcefile")).toAbsolutePath();
     private static final Path PROJECT_ROOT = JALEBI_FILE.getParent();
 
     // Look at
-    // ../JalebiBuildBootstrapped#getJalebiBootstrapVendoredJar()/VENDORED_BOOTSTRAP_JAR
-    private static final Path TARGET_JAR =
-            PROJECT_ROOT.resolve("target/jalebi-bootstrap-vendored.jar");
+    // ../JalebiBuildCoreped#getJalebiCoreVendoredJar()/VENDORED_CORE_JAR
+    private static final Path TARGET_JAR = PROJECT_ROOT.resolve("target/jalebi-core-vendored.jar");
     private static final Path TARGET_KLS = PROJECT_ROOT.resolve("target/classes");
 
     private static final JavaCompiler COMPILER = ToolProvider.getSystemJavaCompiler();
@@ -69,7 +68,7 @@ class JalebiBootstrapVendoredBuild {
         System.setProperty(
                 "java.util.logging.SimpleFormatter.format",
                 "[%1$tF %1$tT > %4$-6.6s %3$-25.25s] %5$s%6$s%n");
-        LOG.info("jalebi.bootstrap is bootstrapping.");
+        LOG.info("Building vendored jalebi.core.");
 
         Path moduleInfoFolder = PROJECT_ROOT.resolve("src/main/java/");
 
@@ -87,16 +86,18 @@ class JalebiBootstrapVendoredBuild {
         }
 
         DiagnosticCollector<JavaFileObject> ds = new DiagnosticCollector<>();
-	Files.createDirectories(TARGET_KLS);
+        Files.createDirectories(TARGET_KLS);
         try (StandardJavaFileManager fm = COMPILER.getStandardFileManager(ds, null, null)) {
 
             Iterable<? extends JavaFileObject> sources =
                     fm.getJavaFileObjectsFromPaths(sourceFiles);
-	    //fm.setLocation(javax.tools.StandardLocation.CLASS_OUTPUT, Arrays.asList(TARGET_KLS.toFile()));
-	    //fm.setLocation(javax.tools.StandardLocation.CLASS_PATH, Arrays.asList(TARGET_KLS.toFile()));
+            // fm.setLocation(javax.tools.StandardLocation.CLASS_OUTPUT,
+            // Arrays.asList(TARGET_KLS.toFile()));
+            // fm.setLocation(javax.tools.StandardLocation.CLASS_PATH,
+            // Arrays.asList(TARGET_KLS.toFile()));
             JavaCompiler.CompilationTask task =
                     COMPILER.getTask(
-                            null, fm, ds, List.of("-d", TARGET_KLS.toString()), null, sources);	    
+                            null, fm, ds, List.of("-d", TARGET_KLS.toString()), null, sources);
             boolean result = task.call();
             ds.getDiagnostics().forEach(x -> System.out.println(x.toString()));
             if (!result) {
