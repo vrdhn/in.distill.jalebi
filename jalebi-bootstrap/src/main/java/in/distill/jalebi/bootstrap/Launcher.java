@@ -10,12 +10,12 @@ public final class Launcher {
     /**
      * Launcher will run command line.
      *
-     * @param script the Path to script, it's Parent is root of build
-     * @param modules thelist of modules, relative to Parent.
-     * @param args command line arguments types by user.
+     * @param top the Top directory of the project.
+     * @param modules the list of modules, relative to Top
+     * @param args command line arguments typed by user.
      */
-    public static void launcher(Path script, String[] modules, String[] args) {
-        processJalebiFolders(script.getParent(),modules);
+    public static void launcher(Path top, String[] modules, String[] args) {
+        processJalebiFolders(top,modules);
 
         // 1. Process
         // 1, get all 'src/[Processor]' names.
