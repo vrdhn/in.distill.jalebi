@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class ModelBuilder {
-    private static Logger LOG = Logger.getLogger(ModelBuilder.class.getName());
+    private static Logger LOG = Logger.getLogger(ModelBuilder.class.getSimpleName());
 
     private final Path projectRoot;
 

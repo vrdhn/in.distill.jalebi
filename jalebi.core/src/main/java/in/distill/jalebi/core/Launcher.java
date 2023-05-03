@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public final class Launcher {
-    private static Logger LOG = Logger.getLogger(Launcher.class.getName());
+    private static Logger LOG = Logger.getLogger(Launcher.class.getSimpleName());
 
     /**
      * Launcher will run command line.
@@ -41,7 +41,7 @@ public final class Launcher {
             if (Files.exists(moduleInfo)) {
                 LOG.info("Found " + moduleInfo);
             } else {
-                LOG.info("NOT FOUND " + moduleInfo);
+                // LOG.info("NOT FOUND " + moduleInfo);
             }
         }
     }
