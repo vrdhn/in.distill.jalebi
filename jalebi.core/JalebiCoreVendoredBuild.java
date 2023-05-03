@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later; (C) Vardhan Varma, Distill.in
 
-// This ia specialized CoreperJalebi.java for the coreper. Using this elsewhere
-// is not recommended.
+/*
+ * This builds vendored jalebi-core, there doesn't not exist any other use.
+ * Any other vendored plugin will be compiled by jalebi-core.
+ *
+ */
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -47,17 +50,17 @@ class JalebiCoreVendoredBuild {
 
     static boolean recompileCheck(List<Path> sourceFiles) throws IOException {
         if (!Files.exists(TARGET_JAR)) {
-            LOG.info("compile because no jar");
+            // LOG.info("compile because no jar");
             return true;
         }
         FileTime jarTime = Files.getLastModifiedTime(TARGET_JAR);
         if (jarTime.compareTo(Files.getLastModifiedTime(JALEBI_FILE)) < 0) {
-            LOG.info("compile because newer:" + JALEBI_FILE);
+            // LOG.info("compile because newer:" + JALEBI_FILE);
             return true;
         }
         for (Path s : sourceFiles) {
             if (jarTime.compareTo(Files.getLastModifiedTime(s)) < 0) {
-                LOG.info("compile because newer:" + s);
+                // LOG.info("compile because newer:" + s);
                 return true;
             }
         }
@@ -68,8 +71,9 @@ class JalebiCoreVendoredBuild {
         System.setProperty(
                 "java.util.logging.SimpleFormatter.format",
                 "[%1$tF %1$tT > %4$-6.6s %3$-25.25s] %5$s%6$s%n");
-        LOG.info("Building vendored jalebi.core.");
 
+        // Should source be kept in src/jalebi/java or sec/main/java ???
+        // by convention, src/jalebi is NEVER SHIPPED, so it's src/main
         Path moduleInfoFolder = PROJECT_ROOT.resolve("src/main/java/");
 
         List<Path> sourceFiles =
@@ -77,13 +81,14 @@ class JalebiCoreVendoredBuild {
                         .filter((p) -> p.toString().endsWith(".java"))
                         .filter((p) -> Files.isRegularFile(p))
                         .toList();
-        for (Path s : sourceFiles) {
-            LOG.info("SOURCE : " + moduleInfoFolder.relativize(s));
-        }
+        // for (Path s : sourceFiles) {
+        //    LOG.info("SOURCE : " + moduleInfoFolder.relativize(s));
+        // }
         if (!recompileCheck(sourceFiles)) {
-            LOG.info("Recompilation not required");
+            LOG.info("Skipping recompilation of vendored jalebi.core");
             return;
         }
+        LOG.info("Building vendored jalebi.core.");
 
         DiagnosticCollector<JavaFileObject> ds = new DiagnosticCollector<>();
         Files.createDirectories(TARGET_KLS);

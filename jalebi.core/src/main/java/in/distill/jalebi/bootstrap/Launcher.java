@@ -18,9 +18,9 @@ public final class Launcher {
     public static void launcher(Path top, String[] modules, String[] args) throws Exception {
         processJalebiFolders(top, modules);
 
-        Tools tools = processModuleFolders(top, modules);
+        ModelBuilder mb = processModuleFolders(top, modules);
 
-        tools.run(args);
+        // tools.run(args);
 
         System.out.println("Bootstrap is launched");
     }
@@ -48,30 +48,24 @@ public final class Launcher {
         return Files.list(p).filter(f -> Files.isDirectory(f)).toList();
     }
 
-    private static void walk(Tools tools, Path modRoot, Path p, int depth) throws Exception {
+    private static void walk(ModelBuilder mb, Path modRoot, Path p, int depth) throws Exception {
         if (depth > 0) {
             depth--;
             for (Path sub : getSubDirs(p)) {
                 Path f = modRoot.relativize(sub);
-                LOG.info("Checking " + modRoot.getFileName() + " : " + f);
-                if (!tools.tryToClaim(f)) {
-                    walk(modRoot, sub, depth);
+                if (!mb.tryToClaim(modRoot, f)) {
+                    walk(mb, modRoot, sub, depth);
                 }
             }
         }
     }
 
-    // Create the Tools, which will have
-
-    // All the tools we'll need to run.
-
-    // a module folder will have 'src/[processor]/
-    private static Tools processModuleFolders(Path top, String[] modules) throws Exception {
-        Tools tools = new Tools();
+    private static ModelBuilder processModuleFolders(Path top, String[] modules) throws Exception {
+        ModelBuilder mb = new ModelBuilder(top, modules);
         for (String module : modules) {
             Path modRoot = top.resolve(module);
-            walk(tools, modRoot, modRoot, 3);
+            walk(mb, modRoot, modRoot, 3);
         }
-        return tools;
+        return mb;
     }
 }
