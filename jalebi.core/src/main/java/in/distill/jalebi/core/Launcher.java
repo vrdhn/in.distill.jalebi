@@ -2,8 +2,10 @@ package in.distill.jalebi.core;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public final class Launcher {
     private static Logger LOG = Logger.getLogger(Launcher.class.getName());
@@ -22,7 +24,7 @@ public final class Launcher {
 
         // tools.run(args);
 
-        System.out.println("Bootstrap is launched");
+        System.out.println("jalebi.core is launched");
     }
 
     // if src/jalebi/java/module-info.java exists, compile and load it.
@@ -48,24 +50,67 @@ public final class Launcher {
         return Files.list(p).filter(f -> Files.isDirectory(f)).toList();
     }
 
-    private static void walk(ModelBuilder mb, Path modRoot, Path p, int depth) throws Exception {
+    // retturn true if fully claimed.
+    private static boolean walk(ModelBuilder mb, Path moduleRoot, Path p, int depth)
+            throws Exception {
         if (depth > 0) {
             depth--;
-            for (Path sub : getSubDirs(p)) {
-                Path f = modRoot.relativize(sub);
-                if (!mb.tryToClaim(modRoot, f)) {
-                    walk(mb, modRoot, sub, depth);
+            List<Path> unclaimed = new ArrayList<>();
+            int claimed = 0;
+            List<Path> subs = getSubDirs(p);
+            List<Tool.Factory> tools = ToolRegistry.getToolFactories();
+            for (Path sub : subs) {
+                Path frag = moduleRoot.relativize(sub);
+                List<Tool.Factory> claimers = tools.stream().filter(f -> f.claim(frag)).toList();
+                if (claimers.isEmpty()) {
+                    unclaimed.add(sub);
+                } else {
+                    if (claimers.size() > 1) {
+                        LOG.severe(
+                                "Too many claims for "
+                                        + frag
+                                        + " : "
+                                        + claimers.stream()
+                                                .map(f -> f.name())
+                                                .collect(Collectors.joining(", ")));
+                        // Picking the first claim...
+                    }
+                    claimed++;
+                    mb.claim(moduleRoot, claimers.get(0), frag);
                 }
             }
+
+            // Everything was claimed, nothing left to do
+            if (unclaimed.isEmpty()) {
+                return true;
+            }
+            // recurse in unclaimed...
+            boolean allClaimed = true;
+            for (Path sub : unclaimed) {
+                if (!walk(mb, moduleRoot, sub, depth)) {
+                    LOG.severe(
+                            "Unclaimed directory: "
+                                    + moduleRoot.getFileName()
+                                    + "/"
+                                    + moduleRoot.relativize(sub));
+                    allClaimed = false;
+                }
+            }
+            return false;
         }
+        return false;
     }
 
     private static ModelBuilder processModuleFolders(Path top, String[] modules) throws Exception {
         ModelBuilder mb = new ModelBuilder(top, modules);
+        boolean ret = true;
         for (String module : modules) {
-            Path modRoot = top.resolve(module);
-            walk(mb, modRoot, modRoot, 3);
+            Path moduleRoot = top.resolve(module);
+            if (!walk(mb, moduleRoot, moduleRoot, 3)) {
+                ret = false;
+            }
         }
+        // return ret ? mb : null;
         return mb;
     }
 }
