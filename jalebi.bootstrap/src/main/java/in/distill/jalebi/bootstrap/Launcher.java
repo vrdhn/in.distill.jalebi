@@ -2,11 +2,12 @@ package in.distill.jalebi.bootstrap;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.logging.Logger;
-
 
 public final class Launcher {
     private static Logger LOG = Logger.getLogger(Launcher.class.getName());
+
     /**
      * Launcher will run command line.
      *
@@ -14,29 +15,18 @@ public final class Launcher {
      * @param modules the list of modules, relative to Top
      * @param args command line arguments typed by user.
      */
-    public static void launcher(Path top, String[] modules, String[] args) {
-        processJalebiFolders(top,modules);
+    public static void launcher(Path top, String[] modules, String[] args) throws Exception {
+        processJalebiFolders(top, modules);
 
-        // 1. Process
-        // 1, get all 'src/[Processor]' names.
-        // 2. get all the JalebiProcessor targets.
-        // 3. background-Download all the missing processors : src/[Processor]
-        // 4. run the JalebiProcessor target
-        // 5.
+        Tools tools = processModuleFolders(top, modules);
 
-        // Processors registry will tell the processor to use for src/[processor]
-        // except for src/jalebi, which is special
-        //
-
-        // Module should contain /src/[type]/[subtype]
-        // compile all the src/jalebi/java/
-        // if it doesn't exist , look at other
-        //   src/*/ and provide standard stuffs
-        //
+        tools.run(args);
 
         System.out.println("Bootstrap is launched");
     }
 
+    // if src/jalebi/java/module-info.java exists, compile and load it.
+    // loading it will register *things*
     private static void processJalebiFolders(Path root, String[] modules) {
         for (String module : modules) {
             Path moduleInfo =
@@ -48,7 +38,27 @@ public final class Launcher {
                             .toAbsolutePath();
             if (Files.exists(moduleInfo)) {
                 LOG.info("Found " + moduleInfo);
+            } else {
+                LOG.info("NOT FOUND " + moduleInfo);
             }
         }
+    }
+
+    // All the tools we'll need to run.
+
+    // a module folder will have 'src/[processor]/
+    private static Tools processModuleFolders(Path root, String[] modules) throws Exception {
+        Tools tools = new Tools();
+        for (String module : modules) {
+            Path src = root.resolve(module).resolve("src");
+            if (Files.exists(src) && Files.isDirectory(src)) {
+                List<Path> toolRoots = Files.list(src).toList();
+                for (Path toolRoot : toolRoots) {
+                    String toolName = toolRoot.getFileName().toString();
+                    tools.addToolRoot(module, toolName, toolRoot);
+                }
+            }
+        }
+        return tools;
     }
 }

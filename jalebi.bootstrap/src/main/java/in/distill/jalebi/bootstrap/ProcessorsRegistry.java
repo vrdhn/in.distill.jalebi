@@ -1,23 +1,17 @@
 package in.distill.jalebi.bootstrap;
 
-
 import in.distill.jalebi.api.Processor;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * A src/[Processor]/[Type]/ is handled by a particular processor.
- * This is registry of such processors.
+ * A src/[Processor]/[Type]/ is handled by a particular processor. This is registry of such
+ * processors.
  *
- * This is going to be downloaded and cached.
- *
+ * <p>This is going to be downloaded and cached.
  */
 public class ProcessorsRegistry {
 
-
     // { x.claimedFolderName() ==> x }
-    ConcurrentHashMap<String, Processor>  processors;
-
-
-
+    ConcurrentHashMap<String, Processor> processors;
 }
