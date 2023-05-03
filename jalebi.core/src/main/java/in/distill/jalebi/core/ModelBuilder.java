@@ -1,4 +1,4 @@
-package in.distill.jalebi.bootstrap;
+package in.distill.jalebi.core;
 
 import java.nio.file.Path;
 import java.util.logging.Logger;

@@ -1,4 +1,4 @@
-package in.distill.jalebi.bootstrap;
+package in.distill.jalebi.core;
 
 import in.distill.jalebi.api.Processor;
 
