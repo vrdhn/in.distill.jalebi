@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.MalformedURLException;
 import java.lang.reflect.Method;
+import java.util.logging.Logger;
 
 /**
  * This file is an example of vendored <code>jalebi-bootstrap</code>, where it is compiled, rather
@@ -21,6 +22,7 @@ import java.lang.reflect.Method;
  * </pre>
  */
 public final class JalebiBuildBootstrapped {
+    private static Logger LOG = Logger.getLogger(JalebiBuildBootstrapped.class.getName());
 
     /**
      * Here you define all the modules there are ...... A module should have
@@ -66,12 +68,13 @@ public final class JalebiBuildBootstrapped {
                 PROJECT_ROOT.resolve("jalebi-bootstrap/target/jalebi-bootstrap-vendored.jar");
 
         if (!Files.exists(VENDORED_BOOTSTRAP)) {
+            LOG.severe("Cannot not read file " + VENDORED_BOOTSTRAP);
             return null;
         }
         Process proc =
                 new ProcessBuilder()
                         .directory(VENDORED_BOOTSTRAP.getParent().toFile())
-                        .command(JAVA_BINARY.toString(), VENDORED_BOOTSTRAP.toString())
+                        .command(JAVA_BINARY.toString(), VENDORED_BOOTSTRAP.toString(),VENDORED_BOOTSTRAP_JAR.toString())
                         .start();
         int ret = proc.waitFor();
         if (ret != 0 || !Files.exists(VENDORED_BOOTSTRAP_JAR)) {
@@ -91,8 +94,12 @@ public final class JalebiBuildBootstrapped {
      * @throws Exception
      */
     public static void main(String[] args) throws Exception {
+        System.setProperty("java.util.logging.SimpleFormatter.format","[%1$tF %1$tT > %3$s] %5$s%6$s%n");
+        LOG.info("Jalebi is bootstrapping.");
 
         final Path stage1Jar = getJalebiBootstrapVendoredJar();
+        LOG.info("Prepared jar " +stage1Jar);
+
 
         JarFileLoader jfl = new JarFileLoader();
         jfl.addFile(stage1Jar);
