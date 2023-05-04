@@ -72,7 +72,7 @@ class JalebiCoreVendoredBuild {
                 "java.util.logging.SimpleFormatter.format",
                 "[%1$tF %1$tT > %4$-6.6s %3$-25.25s] %5$s%6$s%n");
 
-        // Should source be kept in src/jalebi/java or sec/main/java ???
+        // Should source be kept in src/jalebi/java or src/main/java ???
         // by convention, src/jalebi is NEVER SHIPPED, so it's src/main
         Path moduleInfoFolder = PROJECT_ROOT.resolve("src/main/java/");
 

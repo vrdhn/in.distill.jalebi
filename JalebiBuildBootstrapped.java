@@ -29,46 +29,45 @@ public final class JalebiBuildBootstrapped {
      * optionally src/jalebi/java/module-info.java
      */
     private static final String[] MODULES = {
-        "jalebi.core", // Gets compiled twice , once as vendored, then as modules.
+        "jalebi.core", // Gets compiled twice , once as vendored, then as module.
         "jalebi.examples.library",
         "jalebi.examples.executable",
     };
 
+    // This *should* use java compiler API, but for now
+    // it's okay if this launches java,
+    // vendoring of jalebi.botstrap is a *special* case.
     private static class Vendored {
 
-        // This is fine on linux . Windows has additional complexity of javaw and .exe
-        private static final Path JAVA_BINARY =
-                Paths.get(System.getProperty("java.home"), "bin", "java");
-
-        // This *should* use java compiler API, but for now
-        // it's okay if this launches java,
-        // vendoring of jalebi.botstrap is a *special* case.
         public static Path getJalebiCoreJar(Path projectRoot)
                 throws IOException, InterruptedException {
+
+            // This is fine on linux . Windows has additional complexity of javaw and .exe
+            final Path javaBinary = Paths.get(System.getProperty("java.home"), "bin", "java");
             // Look at jalebi.core/JalebiCoreVendoredBuild.java
-            final Path VENDORED_CORE =
+            final Path vendoredCoreBuildScript =
                     projectRoot.resolve("jalebi.core/JalebiCoreVendoredBuild.java");
             // Look at jalebi.core/JalebiCoreVendoredBuild#TARGET_JAR
-            final Path VENDORED_CORE_JAR =
+            final Path vendoredCoreJar =
                     projectRoot.resolve("jalebi.core/target/jalebi-core-vendored.jar");
 
-            if (!Files.exists(VENDORED_CORE)) {
-                LOG.severe("Cannot not read file " + VENDORED_CORE);
+            if (!Files.exists(vendoredCoreBuildScript)) {
+                LOG.severe("Cannot not read file " + vendoredCoreBuildScript);
                 return null;
             }
             Process proc =
                     new ProcessBuilder()
                             .inheritIO()
-                            .directory(VENDORED_CORE.getParent().toFile())
-                            .command(JAVA_BINARY.toString(), VENDORED_CORE.toString())
+                            .directory(vendoredCoreBuildScript.getParent().toFile())
+                            .command(javaBinary.toString(), vendoredCoreBuildScript.toString())
                             .start();
             int ret = proc.waitFor();
-            if (ret != 0 || !Files.exists(VENDORED_CORE_JAR)) {
-                LOG.severe("** ERROR compiling vendored " + VENDORED_CORE);
+            if (ret != 0 || !Files.exists(vendoredCoreJar)) {
+                LOG.severe("** ERROR compiling vendored " + vendoredCoreBuildScript);
                 return null;
             }
 
-            return VENDORED_CORE_JAR;
+            return vendoredCoreJar;
         }
     } // class Vendored
 

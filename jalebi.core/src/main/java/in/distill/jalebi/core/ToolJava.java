@@ -15,7 +15,7 @@ public final class ToolJava implements Tool {
 
         @Override
         public boolean claim(Path fragment) {
-            return "src/main".equals(fragment.toString());
+            return "src/main/java".equals(fragment.toString());
         }
 
         @Override

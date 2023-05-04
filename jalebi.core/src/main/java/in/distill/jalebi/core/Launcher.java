@@ -50,7 +50,10 @@ public final class Launcher {
         return Files.list(p).filter(f -> Files.isDirectory(f)).toList();
     }
 
-    // retturn true if fully claimed.
+    // return false if none of the subs are claimed.
+    // even if one sub is claimed, we issue msg for the rest and return true
+    // recursing, this implies that msgs for higher level directories are
+    // not neededlessly handedout.
     private static boolean walk(ModelBuilder mb, Path moduleRoot, Path p, int depth)
             throws Exception {
         if (depth > 0) {
@@ -85,7 +88,6 @@ public final class Launcher {
                 return true;
             }
             // recurse in unclaimed...
-            boolean allClaimed = true;
             for (Path sub : unclaimed) {
                 if (!walk(mb, moduleRoot, sub, depth)) {
                     LOG.severe(
@@ -93,10 +95,9 @@ public final class Launcher {
                                     + moduleRoot.getFileName()
                                     + "/"
                                     + moduleRoot.relativize(sub));
-                    allClaimed = false;
                 }
             }
-            return false;
+            return true;
         }
         return false;
     }
