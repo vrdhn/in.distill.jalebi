@@ -32,6 +32,10 @@ import javax.tools.ToolProvider;
  * Collect all the java  files from  src/main/java
  * Compare if any of them, or this file, is newer then target/jalebi-core.jar
  * if yes compile and recreate the jalebi-core.jar
+ *
+ * <code>
+ *   java JalebiCoreVendoredBuild.java  <Full-Path-to-output-jar>
+ * </code>
  */
 
 class JalebiCoreVendoredBuild {
@@ -41,10 +45,8 @@ class JalebiCoreVendoredBuild {
             Paths.get(System.getProperty("jdk.launcher.sourcefile")).toAbsolutePath();
     private static final Path PROJECT_ROOT = JALEBI_FILE.getParent();
 
-    // Look at
-    // ../JalebiBuildCoreped#getJalebiCoreVendoredJar()/VENDORED_CORE_JAR
-    private static final Path TARGET_JAR = PROJECT_ROOT.resolve("target/jalebi-core-vendored.jar");
-    private static final Path TARGET_KLS = PROJECT_ROOT.resolve("target/classes");
+    private static Path TARGET_JAR;
+    private static Path TARGET_KLS;
 
     private static final JavaCompiler COMPILER = ToolProvider.getSystemJavaCompiler();
 
@@ -71,6 +73,9 @@ class JalebiCoreVendoredBuild {
         System.setProperty(
                 "java.util.logging.SimpleFormatter.format",
                 "[%1$tF %1$tT > %4$-6.6s %3$-25.25s] %5$s%6$s%n");
+
+        TARGET_JAR = Paths.get(args[0]);
+        TARGET_KLS = TARGET_JAR.getParent().resolve("classes");
 
         // Should source be kept in src/jalebi/java or src/main/java ???
         // by convention, src/jalebi is NEVER SHIPPED, so it's src/main

@@ -60,9 +60,9 @@ public final class Launcher {
             List<Path> unclaimed = new ArrayList<>();
             int claimed = 0;
             List<Path> subs = getSubDirs(p);
-	    if( subs.isEmpty() ) {
-		return true;
-	    }
+            if (subs.isEmpty()) {
+                return true;
+            }
             List<Tool.Factory> tools = ToolRegistry.getToolFactories();
             for (Path sub : subs) {
                 Path frag = moduleRoot.relativize(sub);
@@ -85,17 +85,17 @@ public final class Launcher {
                 }
             }
             // recurse in unclaimed...
-	    boolean ret = claimed > 0;
+            boolean ret = claimed > 0;
             for (Path sub : unclaimed) {
                 if (walk(mb, moduleRoot, sub, depth)) {
-		    ret = true;
+                    ret = true;
                 } else {
                     LOG.severe(
                             "Unclaimed directory: "
                                     + moduleRoot.getFileName()
                                     + "/"
                                     + moduleRoot.relativize(sub));
-		}
+                }
             }
             return ret;
         }

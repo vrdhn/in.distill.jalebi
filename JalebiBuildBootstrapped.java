@@ -44,12 +44,13 @@ public final class JalebiBuildBootstrapped {
 
             // This is fine on linux . Windows has additional complexity of javaw and .exe
             final Path javaBinary = Paths.get(System.getProperty("java.home"), "bin", "java");
-            // Look at jalebi.core/JalebiCoreVendoredBuild.java
+
             final Path vendoredCoreBuildScript =
                     projectRoot.resolve("jalebi.core/JalebiCoreVendoredBuild.java");
-            // Look at jalebi.core/JalebiCoreVendoredBuild#TARGET_JAR
-            final Path vendoredCoreJar =
-                    projectRoot.resolve("jalebi.core/target/jalebi-core-vendored.jar");
+
+            final Path vendoredOutput = projectRoot.resolve("target/vendored/jalebi.core");
+
+            final Path vendoredCoreJar = vendoredOutput.resolve("jalebi-core-vendored.jar");
 
             if (!Files.exists(vendoredCoreBuildScript)) {
                 LOG.severe("Cannot not read file " + vendoredCoreBuildScript);
@@ -59,7 +60,10 @@ public final class JalebiBuildBootstrapped {
                     new ProcessBuilder()
                             .inheritIO()
                             .directory(vendoredCoreBuildScript.getParent().toFile())
-                            .command(javaBinary.toString(), vendoredCoreBuildScript.toString())
+                            .command(
+                                    javaBinary.toString(),
+                                    vendoredCoreBuildScript.toString(),
+                                    vendoredCoreJar.toString())
                             .start();
             int ret = proc.waitFor();
             if (ret != 0 || !Files.exists(vendoredCoreJar)) {
