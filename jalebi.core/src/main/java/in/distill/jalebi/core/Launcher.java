@@ -50,10 +50,9 @@ public final class Launcher {
         return Files.list(p).filter(f -> Files.isDirectory(f)).toList();
     }
 
-    // return false if none of the subs are claimed.
-    // even if one sub is claimed, we issue msg for the rest and return true
-    // recursing, this implies that msgs for higher level directories are
-    // not neededlessly handedout.
+    // This function can need fine tuning.
+    // It needs to iterate for all path-frag of given depth, trying to find tool.
+    // The tricky part is giving unclaimed message for the correct path-fragments.
     private static boolean walk(ModelBuilder mb, Path moduleRoot, Path p, int depth)
             throws Exception {
         if (depth > 0) {
@@ -61,6 +60,9 @@ public final class Launcher {
             List<Path> unclaimed = new ArrayList<>();
             int claimed = 0;
             List<Path> subs = getSubDirs(p);
+	    if( subs.isEmpty() ) {
+		return true;
+	    }
             List<Tool.Factory> tools = ToolRegistry.getToolFactories();
             for (Path sub : subs) {
                 Path frag = moduleRoot.relativize(sub);
@@ -82,22 +84,20 @@ public final class Launcher {
                     mb.claim(moduleRoot, claimers.get(0), frag);
                 }
             }
-
-            // Everything was claimed, nothing left to do
-            if (unclaimed.isEmpty()) {
-                return true;
-            }
             // recurse in unclaimed...
+	    boolean ret = claimed > 0;
             for (Path sub : unclaimed) {
-                if (!walk(mb, moduleRoot, sub, depth)) {
+                if (walk(mb, moduleRoot, sub, depth)) {
+		    ret = true;
+                } else {
                     LOG.severe(
                             "Unclaimed directory: "
                                     + moduleRoot.getFileName()
                                     + "/"
                                     + moduleRoot.relativize(sub));
-                }
+		}
             }
-            return true;
+            return ret;
         }
         return false;
     }
