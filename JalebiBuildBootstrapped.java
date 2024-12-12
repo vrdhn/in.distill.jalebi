@@ -103,7 +103,7 @@ public final class JalebiBuildBootstrapped {
 
         try (JarFileLoader jfl = new JarFileLoader()) {
             jfl.addFile(coreJar);
-            // public static void launcher(Path script, String[] modules, String[] args)
+            // public static void launcher(Path projectRoot, String[] modules, String[] args)
             Class<?> cls = jfl.loadClass("in.distill.jalebi.core.Launcher");
             Method launcher =
                     cls.getMethod(
